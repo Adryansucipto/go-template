@@ -13,7 +13,7 @@ type Controller struct {
 	User user.Controller
 }
 
-func (c Controller) Routes(ec *echo.Echo) {
+func (c *Controller) Routes(ec *echo.Echo) {
 
 	base := ec.Group("")
 	v1 := base.Group("/v1")
@@ -21,6 +21,6 @@ func (c Controller) Routes(ec *echo.Echo) {
 	// user
 	userGroup := v1.Group("/users")
 	userGroup.GET("", c.User.GetUsers)
-	userGroup.POST("", c.User.CreateUser)
+	//userGroup.POST("", c.User.CreateUser)
 
 }

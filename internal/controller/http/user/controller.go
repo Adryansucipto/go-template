@@ -1,7 +1,12 @@
 package user
 
-import "go.uber.org/dig"
+import (
+	userUsecase "go-template/internal/usecase/user"
+
+	"go.uber.org/dig"
+)
 
 type Controller struct {
 	dig.In
+	User userUsecase.Usecase
 }

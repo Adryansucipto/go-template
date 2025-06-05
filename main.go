@@ -35,7 +35,7 @@ func onRun(container *dig.Container) error {
 		ctrl.HTTP.Routes(e)
 
 		// Start the HTTP server
-		return e.Start(":8080")
+		return e.Start(":9001")
 	})
 }
 

@@ -1,6 +1,10 @@
 package di
 
 import (
+	"go-template/internal/repository"
+	"go-template/internal/usecase"
+	"go-template/pkg/config"
+	"go-template/pkg/resource"
 	"sync"
 
 	"go.uber.org/dig"
@@ -18,6 +22,26 @@ func Container() (*dig.Container, error) {
 	var outer error
 	once.Do(func() {
 		container = dig.New()
+
+		if err := config.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := resource.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := usecase.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := repository.Register(container); err != nil {
+			outer = err
+			return
+		}
 	})
 
 	if outer != nil {
