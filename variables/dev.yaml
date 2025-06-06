@@ -1,0 +1,12 @@
+app:
+  name: MyApp
+
+database:
+  postgreSql:
+    driver: postgresql
+    username: postgres.ivohvdqiecnqqxxfebfi
+    password: (admin123#123)
+    host: aws-0-ap-southeast-1.pooler.supabase.com
+    port: "5432"
+    name: postgres
+    schema: public

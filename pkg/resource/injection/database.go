@@ -9,7 +9,10 @@ import (
 )
 
 func NewDatabase(cfg pkgConfig.Config) (db model.Database, err error) {
-	dbPostgreSql, err := gorm.Open(postgres.Open(cfg.Database.GenerateConnectionPostgresString()), &gorm.Config{})
+	dbPostgreSql, err := gorm.Open(postgres.Open(cfg.Database.PostgreSql.GenerateConnectionPostgresString()), &gorm.Config{})
+	if err != nil {
+		return
+	}
 
 	db = model.Database{
 		PostgreSql: dbPostgreSql,

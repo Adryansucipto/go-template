@@ -9,7 +9,7 @@ import (
 type Repository struct {
 	dig.In
 
-	Repository dbRepo.Repository
+	DBRepository dbRepo.Repository
 }
 
 func Register(container *dig.Container) (err error) {

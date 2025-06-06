@@ -1,14 +1,20 @@
 package impl
 
-import userUsecase "go-template/internal/usecase/user"
+import (
+	"go-template/internal/repository"
+	userUsecase "go-template/internal/usecase/user"
+)
 
 var (
 	tag = "[UserUsecase]"
 )
 
 type Usecase struct {
+	Repository repository.Repository
 }
 
-func New() userUsecase.Usecase {
-	return &Usecase{}
+func New(repository repository.Repository) userUsecase.Usecase {
+	return &Usecase{
+		Repository: repository,
+	}
 }
