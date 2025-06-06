@@ -3,7 +3,7 @@
 Make high-level guide on structuring a Clean Architecture in Go for building a RESTful API.
 
 -------------------------------------------------------------------------------------------
-
+```
 Depedencies Injection Flows
 
 CONFIG        ← Parses & provides configuration
@@ -15,3 +15,6 @@ REPOSITORY    ← Depends on RESOURCE (interacts with DB, Redis, etc.)
 USECASE       ← Depends on REPOSITORY (contains business logic)
    ↓
 CONTROLLER    ← Depends on USECASE (handles HTTP requests & responses)
+```
+
+
