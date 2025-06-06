@@ -6,12 +6,12 @@ Make high-level guide on structuring a Clean Architecture in Go for building a R
 
 Depedencies Injection Flows
 
-  CONFIG        ← parse & provide configuration
-     ||
-  RESOURCE      ← membutuhkan CONFIG (untuk inisialisasi: DB, Redis, S3)
-     ||
-  REPOSITORY    ← membutuhkan RESOURCE (akses DB, Redis, dll)
-     ||
-  USECASE       ← membutuhkan REPOSITORY dan terkadang RESOURCE langsung
-     ||
-  CONTROLLER    ← membutuhkan USECASE
+CONFIG        ← Parses & provides configuration
+   ↓
+RESOURCE      ← Depends on CONFIG (initializes DB, Redis, S3, etc.)
+   ↓
+REPOSITORY    ← Depends on RESOURCE (interacts with DB, Redis, etc.)
+   ↓
+USECASE       ← Depends on REPOSITORY (contains business logic)
+   ↓
+CONTROLLER    ← Depends on USECASE (handles HTTP requests & responses)
