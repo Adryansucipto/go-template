@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"go-template/internal/controller"
 	pkgDi "go-template/pkg/di"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"go.uber.org/dig"
@@ -35,7 +37,12 @@ func onRun(container *dig.Container) error {
 		ctrl.HTTP.Routes(e)
 
 		// Start the HTTP server
-		return e.Start(":9001")
+		port := os.Getenv("PORT")
+		if port == "" {
+			port = "9001" // fallback saat lokal
+		}
+
+		return e.Start(fmt.Sprintf(":%s", port))
 	})
 }
 
