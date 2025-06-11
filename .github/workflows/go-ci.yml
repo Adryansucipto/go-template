@@ -47,6 +47,6 @@ jobs:
 
     - name: Skip test (belum ada)
       run: echo "No tests yet"
-
+      
     - name: Build binary
-      run: go build -v ./...
+    run: go build -o out .
