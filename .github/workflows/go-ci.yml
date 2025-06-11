@@ -44,9 +44,14 @@ jobs:
         echo "    port: ${{ secrets.DB_PORT }}" >> variables/prod.yaml
         echo "    name: ${{ secrets.DB_NAME }}" >> variables/prod.yaml
         echo "    schema: ${{ secrets.DB_SCHEMA }}" >> variables/prod.yaml
+    
+    - name: Check if binary exists
+      run: |
+        ls -lah
+        file out
 
     - name: Skip test (belum ada)
       run: echo "No tests yet"
       
     - name: Build binary
-    run: go build -o out ./cmd
+      run: go build -o out ./cmd
