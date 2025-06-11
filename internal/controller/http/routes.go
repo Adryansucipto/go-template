@@ -15,6 +15,13 @@ type Controller struct {
 
 func (c *Controller) Routes(ec *echo.Echo) {
 
+	ec.GET("/", func(c echo.Context) error {
+		return c.String(200, "Go API is up and running!")
+	})
+	ec.GET("/ping", func(c echo.Context) error {
+		return c.String(200, "Test Ping")
+	})
+
 	base := ec.Group("")
 	v1 := base.Group("/v1")
 
