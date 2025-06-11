@@ -31,6 +31,19 @@ jobs:
 
     - name: Install dependencies
       run: go mod tidy
+          
+    - name: Create prod.yaml from GitHub secrets
+      run: |
+        mkdir -p variables
+        echo "database:" > variables/prod.yaml
+        echo "  postgreSql:" >> variables/prod.yaml
+        echo "    driver: postgresql" >> variables/prod.yaml
+        echo "    username: ${{ secrets.DB_USERNAME }}" >> variables/prod.yaml
+        echo "    password: ${{ secrets.DB_PASSWORD }}" >> variables/prod.yaml
+        echo "    host: ${{ secrets.DB_HOST }}" >> variables/prod.yaml
+        echo "    port: ${{ secrets.DB_PORT }}" >> variables/prod.yaml
+        echo "    name: ${{ secrets.DB_NAME }}" >> variables/prod.yaml
+        echo "    schema: ${{ secrets.DB_SCHEMA }}" >> variables/prod.yaml
 
     - name: Skip test (belum ada)
       run: echo "No tests yet"

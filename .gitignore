@@ -1,3 +1,4 @@
 internal/inbound/http/*/
 internal/inbound/model/*/
-internal/variables
+internal/variables/*
+!internal/variables/dev.yaml

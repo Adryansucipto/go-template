@@ -1,0 +1,12 @@
+app:
+  APP_ENV: prod
+
+database:
+  postgreSql:
+    driver: postgresql
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    host: ${DB_HOST}
+    port: ${DB_PORT}
+    name: ${DB_NAME}
+    schema: ${DB_SCHEMA}

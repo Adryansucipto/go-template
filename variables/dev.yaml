@@ -1,5 +1,5 @@
 app:
-  name: MyApp
+  APP_ENV: dev
 
 database:
   postgreSql:
