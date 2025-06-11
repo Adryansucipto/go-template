@@ -49,4 +49,4 @@ jobs:
       run: echo "No tests yet"
       
     - name: Build binary
-    run: go build -o out .
+    run: go build -o out ./cmd
