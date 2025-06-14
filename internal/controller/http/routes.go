@@ -1,6 +1,7 @@
 package http
 
 import (
+	"go-template/internal/controller/http/auth"
 	"go-template/internal/controller/http/user"
 
 	"github.com/labstack/echo/v4"
@@ -11,6 +12,7 @@ type Controller struct {
 	dig.In
 
 	User user.Controller
+	Auth auth.Controller
 }
 
 func (c *Controller) Routes(ec *echo.Echo) {
@@ -29,5 +31,9 @@ func (c *Controller) Routes(ec *echo.Echo) {
 	userGroup := v1.Group("/users")
 	userGroup.GET("", c.User.GetUsers)
 	//userGroup.POST("", c.User.CreateUser)
+
+	// auth
+	authGroup := v1.Group("/login")
+	authGroup.POST("", c.Auth.LoginFunction)
 
 }

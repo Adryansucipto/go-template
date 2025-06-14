@@ -10,6 +10,7 @@ import (
 type Config struct {
 	AppConfig AppConfig `yaml:"app"`
 	Database  Database  `yaml:"database"`
+	JWT       JwtCnfg   `yaml:"jwt"`
 }
 
 func New() (Config, error) {

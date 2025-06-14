@@ -9,6 +9,15 @@ type Response struct {
 	Page          any   `json:"page,omitempty"`
 }
 
+func ResponseGenerate(code int, err error, data any, page any) Response {
+	return Response{
+		ResponseCode:  code,
+		ResponseError: err,
+		Data:          data,
+		Page:          page,
+	}
+}
+
 func HttpResponses(eCtx echo.Context, response Response) error {
 	return eCtx.JSON(response.ResponseCode, response)
 }

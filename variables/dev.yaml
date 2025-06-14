@@ -1,6 +1,9 @@
 app:
   APP_ENV: dev
 
+jwt:
+  secret: lol
+
 database:
   postgreSql:
     driver: postgresql
