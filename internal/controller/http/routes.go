@@ -3,9 +3,11 @@ package http
 import (
 	"go-template/internal/controller/http/auth"
 	"go-template/internal/controller/http/user"
+	"go-template/middleware"
 
 	"github.com/labstack/echo/v4"
 	"go.uber.org/dig"
+	"go.uber.org/zap"
 )
 
 type Controller struct {
@@ -15,7 +17,9 @@ type Controller struct {
 	Auth auth.Controller
 }
 
-func (c *Controller) Routes(ec *echo.Echo) {
+func (c *Controller) Routes(ec *echo.Echo, logger *zap.Logger) {
+
+	ec.Use(middleware.ZapLogger(logger))
 
 	ec.GET("/", func(c echo.Context) error {
 		return c.String(200, "Go API is up and running!")

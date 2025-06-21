@@ -20,3 +20,13 @@ func (r *Repository) GetUsernamePassword(ctx context.Context, username string) (
 
 	return record, nil
 }
+
+func (r *Repository) GetActiveSession(ctx context.Context, username string) bool {
+	var count int64
+	db := r.DbGorm.WithContext(ctx).Debug()
+
+	if err := db.Model(model.Session{}).Where("username = ? AND expired_session > (now() at time zone 'Asia/Jakarta') ", username).Count(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
+}

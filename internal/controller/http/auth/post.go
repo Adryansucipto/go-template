@@ -15,12 +15,14 @@ func (c *Controller) LoginFunction(eCtx echo.Context) error {
 	var request model.AuthRequest
 	if err := eCtx.Bind(&request); err != nil {
 		response.ResponseCode = http.StatusUnauthorized
-		response.ResponseError = err
+		response.ResponseMessage = err
+		util.ErrorHandler(tag, response.ResponseMessage)
 		return util.HttpResponses(eCtx, response)
 	}
 
-	res, err := c.Auth.LoginHandler(ctx, request)
-	if err != nil {
+	res := c.Auth.LoginHandler(ctx, request)
+	if res.ResponseCode != 200 {
+		util.ErrorHandler(tag, res.ResponseMessage)
 		return util.HttpResponses(eCtx, res)
 	}
 

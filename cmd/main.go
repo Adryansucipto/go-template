@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"go.uber.org/dig"
+	"go.uber.org/zap"
 )
 
 type (
@@ -34,7 +35,10 @@ func onRun(container *dig.Container) error {
 	return container.Invoke(func(ctrl controller.Controller) error {
 		e := echo.New()
 
-		ctrl.HTTP.Routes(e)
+		logger, _ := zap.NewProduction()
+		defer logger.Sync()
+
+		ctrl.HTTP.Routes(e, logger)
 
 		// Start the HTTP server
 		port := os.Getenv("PORT")

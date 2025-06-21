@@ -8,6 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	tag = "[AuthRepository]"
+)
+
 type Repository struct {
 	dig.In
 

@@ -6,6 +6,10 @@ import (
 	"go.uber.org/dig"
 )
 
+var (
+	tag = "[AuthController]"
+)
+
 type Controller struct {
 	dig.In
 	Auth authUsecase.Usecase
