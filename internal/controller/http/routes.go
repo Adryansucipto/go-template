@@ -40,4 +40,8 @@ func (c *Controller) Routes(ec *echo.Echo, logger *zap.Logger) {
 	authGroup := v1.Group("/login")
 	authGroup.POST("", c.Auth.LoginFunction)
 
+	// logout
+	logoutGroup := v1.Group("/logout")
+	logoutGroup.POST("", c.Auth.LogoutFunction)
+
 }

@@ -28,3 +28,21 @@ func (c *Controller) LoginFunction(eCtx echo.Context) error {
 
 	return util.HttpResponses(eCtx, res)
 }
+
+func (c *Controller) LogoutFunction(eCtx echo.Context) error {
+	var response util.Response
+	ctx := eCtx.Request().Context()
+
+	record, response := c.Auth.GetRecordByToken(ctx, eCtx.Request().Header.Get(echo.HeaderAuthorization))
+	if response.ResponseCode != 200 {
+		util.ErrorHandler(tag, response.ResponseMessage)
+		return util.HttpResponses(eCtx, response)
+	}
+	response = c.Auth.DeleteSession(ctx, record)
+	if response.ResponseCode != 200 {
+		util.ErrorHandler(tag, response.ResponseMessage)
+		return util.HttpResponses(eCtx, response)
+	}
+
+	return util.HttpResponses(eCtx, response)
+}

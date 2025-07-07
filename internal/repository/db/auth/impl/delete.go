@@ -6,10 +6,12 @@ import (
 	"go-template/util"
 )
 
-func (r *Repository) CreateSession(ctx context.Context, request repoModel.Session) error {
+func (r *Repository) DeleteSession(ctx context.Context, username string) error {
 	db := r.DbGorm.WithContext(ctx).Debug()
-	if err := db.Create(request).Error; err != nil {
+
+	if err := db.Where("username = ?", username).Delete(&repoModel.Session{}).Error; err != nil {
 		return util.ErrorGenerate(tag, err)
 	}
+
 	return nil
 }

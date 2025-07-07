@@ -3,7 +3,6 @@ package impl
 import (
 	"context"
 	"errors"
-	"fmt"
 	controllerModel "go-template/internal/controller/model"
 	repositoryModel "go-template/internal/repository/model"
 	"go-template/util"
@@ -38,25 +37,18 @@ func (u *Usecase) LoginHandler(ctx context.Context, request controllerModel.Auth
 		)
 	}
 
-	// check session based on outbound - karena login jadi check by DB
-	// kalau action lain ada token baru check by func
-
 	//check session exists
-	active := u.Repository.DBRepository.AuthRepository.GetActiveSession(ctx, request.Username)
-	fmt.Println("is active: ", active)
-	if active {
+	code, err := u.CheckTokenExpired(ctx, "", request.Username)
+	if err != nil {
 		return util.ResponseGenerate(
-			400,
+			code,
 			util.ErrorGenerate(
 				tag,
-				errors.New("error on Session"),
-			),
-			[]string{"Account is on session"},
+				err),
+			nil,
 			nil,
 			nil,
 		)
-	} else {
-		// delete session
 	}
 
 	token, expiredToken, err := u.Config.JWT.CreateToken(request.Username)
@@ -99,6 +91,17 @@ func (u *Usecase) LoginHandler(ctx context.Context, request controllerModel.Auth
 	sessionRepo.CreatedDate = time.Now()
 	sessionRepo.ExpiredSession = expiredToken
 	sessionRepo.ExpiredRefresh = expiredRefreshToken
+	err = u.Repository.DBRepository.AuthRepository.DeleteSession(ctx, request.Username)
+	if err != nil {
+		return util.ResponseGenerate(
+			500,
+			err,
+			nil,
+			nil,
+			nil,
+		)
+	}
+
 	err = u.Repository.DBRepository.AuthRepository.CreateSession(ctx, sessionRepo)
 	if err != nil {
 		return util.ResponseGenerate(

@@ -30,7 +30,6 @@ func Run(containerCall ContainerCall, invoke Invoke, onError InvokeError) error 
 }
 
 func onRun(container *dig.Container) error {
-
 	// Start echo server from injected controller
 	return container.Invoke(func(ctrl controller.Controller) error {
 		e := echo.New()

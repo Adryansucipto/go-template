@@ -14,6 +14,11 @@ type Response struct {
 	Page            any   `json:"page,omitempty"`
 }
 
+// Error implements error.
+func (r Response) Error() string {
+	panic("unimplemented")
+}
+
 type FinalResponse struct {
 	ResponseCode    int    `json:"response_code"`
 	ResponseMessage string `json:"response_message"`
