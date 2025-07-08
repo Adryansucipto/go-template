@@ -33,12 +33,38 @@ func (c *Controller) LogoutFunction(eCtx echo.Context) error {
 	var response util.Response
 	ctx := eCtx.Request().Context()
 
-	record, response := c.Auth.GetRecordByToken(ctx, eCtx.Request().Header.Get(echo.HeaderAuthorization))
+	token, response := c.Auth.ValidateToken(ctx, eCtx.Request().Header.Get(echo.HeaderAuthorization))
 	if response.ResponseCode != 200 {
 		util.ErrorHandler(tag, response.ResponseMessage)
 		return util.HttpResponses(eCtx, response)
 	}
-	response = c.Auth.DeleteSession(ctx, record)
+
+	record, response := c.Auth.AuthorizeUser(ctx, token)
+	if response.ResponseCode != 200 {
+		util.ErrorHandler(tag, response.ResponseMessage)
+		return util.HttpResponses(eCtx, response)
+	}
+
+	response = c.Auth.DeleteSession(ctx, record.Username)
+	if response.ResponseCode != 200 {
+		util.ErrorHandler(tag, response.ResponseMessage)
+		return util.HttpResponses(eCtx, response)
+	}
+
+	return util.HttpResponses(eCtx, response)
+}
+
+func (c *Controller) RefreshFunction(eCtx echo.Context) error {
+	var response util.Response
+	ctx := eCtx.Request().Context()
+
+	username, response := c.Auth.ValidateRefreshToken(ctx, eCtx.Request().Header.Get(echo.HeaderAuthorization))
+	if response.ResponseCode != 200 {
+		util.ErrorHandler(tag, response.ResponseMessage)
+		return util.HttpResponses(eCtx, response)
+	}
+
+	response = c.Auth.RefreshNewToken(ctx, username)
 	if response.ResponseCode != 200 {
 		util.ErrorHandler(tag, response.ResponseMessage)
 		return util.HttpResponses(eCtx, response)

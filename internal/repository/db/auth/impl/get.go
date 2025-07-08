@@ -18,7 +18,7 @@ func (r *Repository) GetUsernamePassword(ctx context.Context, username string) (
 		fmt.Printf("LOL")
 	}
 
-	if err = db.Where("username = ?", username).First(&record).Error; err != nil {
+	if err = db.Select("username,password").Where("username = ?", username).First(&record).Error; err != nil {
 		return model.User{}, err
 	}
 
@@ -40,7 +40,19 @@ func (r *Repository) GetActiveSession(ctx context.Context, username string) (rec
 func (r *Repository) GetActiveSessionByToken(ctx context.Context, token string) (record model.Session, err error) {
 	db := r.DbGorm.WithContext(ctx).Debug()
 
-	if err := db.Where("access_token = ? AND expired_session > (now() at time zone 'Asia/Jakarta')", token).First(&record).Error; err != nil {
+	if err := db.Select("expired_session,username").Where("access_token = ? AND expired_session > (now() at time zone 'Asia/Jakarta')", token).First(&record).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.Session{}, nil
+		}
+		return model.Session{}, util.ErrorGenerate(tag, err)
+	}
+	return record, nil
+}
+
+func (r *Repository) GetActiveSessionByRefreshToken(ctx context.Context, token string) (record model.Session, err error) {
+	db := r.DbGorm.WithContext(ctx).Debug()
+
+	if err := db.Where("refresh_token = ?", token).First(&record).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.Session{}, nil
 		}

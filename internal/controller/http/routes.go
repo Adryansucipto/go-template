@@ -37,11 +37,8 @@ func (c *Controller) Routes(ec *echo.Echo, logger *zap.Logger) {
 	//userGroup.POST("", c.User.CreateUser)
 
 	// auth
-	authGroup := v1.Group("/login")
-	authGroup.POST("", c.Auth.LoginFunction)
-
-	// logout
-	logoutGroup := v1.Group("/logout")
-	logoutGroup.POST("", c.Auth.LogoutFunction)
-
+	authGroup := v1.Group("/auth")
+	authGroup.POST("/login", c.Auth.LoginFunction)
+	authGroup.POST("/logout", c.Auth.LogoutFunction)
+	authGroup.POST("/refresh-token", c.Auth.RefreshFunction)
 }

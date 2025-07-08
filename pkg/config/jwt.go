@@ -65,31 +65,22 @@ func (jwts *JwtCnfg) CreateRefreshToken(username string) (string, time.Time, err
 	return tokenString, expired, nil
 }
 
-func (jwts *JwtCnfg) VerifyRefreshToken(refreshToken string) (string, time.Time, error) {
+func (jwts *JwtCnfg) VerifyRefreshToken(refreshToken string) error {
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwts.Secret), nil
 	})
 
 	if err != nil {
-		return "", time.Time{}, err
+		return err
 	}
 	if !token.Valid {
-		return "", time.Time{}, fmt.Errorf("invalid token")
+		return fmt.Errorf("invalid token")
 	}
 
 	// 2. Cek claim type
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || claims["type"] != "refresh" {
-		return "", time.Time{}, errors.New("invalid refresh token type")
+		return errors.New("invalid refresh token type")
 	}
-
-	username := claims["username"].(string)
-
-	// 3. Generate new access token
-	newAccessToken, expiredToken, err := jwts.CreateToken(username)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-
-	return newAccessToken, expiredToken, nil
+	return nil
 }

@@ -38,7 +38,7 @@ func (u *Usecase) LoginHandler(ctx context.Context, request controllerModel.Auth
 	}
 
 	//check session exists
-	code, err := u.CheckTokenExpired(ctx, "", request.Username)
+	code, err := u.CheckActiveSession(ctx, request.Username)
 	if err != nil {
 		return util.ResponseGenerate(
 			code,
@@ -115,5 +115,74 @@ func (u *Usecase) LoginHandler(ctx context.Context, request controllerModel.Auth
 
 	response = util.ResponseGenerate(200, nil, nil, data, nil)
 
+	return response
+}
+
+func (u *Usecase) RefreshNewToken(ctx context.Context, username string) (response util.Response) {
+
+	// Create new Access_Token
+	token, expiredToken, err := u.Config.JWT.CreateToken(username)
+	if err != nil {
+		return util.ResponseGenerate(
+			500,
+			util.ErrorGenerate(
+				tag,
+				err),
+			nil,
+			nil,
+			nil,
+		)
+	}
+
+	refreshToken, expiredRefreshToken, err := u.Config.JWT.CreateRefreshToken(username)
+	if err != nil {
+		return util.ResponseGenerate(
+			500,
+			util.ErrorGenerate(
+				tag,
+				err),
+			nil,
+			nil,
+			nil)
+	}
+
+	var data controllerModel.AuthResponse
+	data.Username = username
+	data.AccessToken = token
+	data.RefreshToken = refreshToken
+	data.ExpiredToken = expiredToken
+	data.ExpiredRefreshToken = expiredRefreshToken
+
+	// Insert To Database
+	var sessionRepo repositoryModel.Session
+	sessionRepo.Username = username
+	sessionRepo.AccessToken = token
+	sessionRepo.RefreshToken = refreshToken
+	sessionRepo.CreatedDate = time.Now()
+	sessionRepo.ExpiredSession = expiredToken
+	sessionRepo.ExpiredRefresh = expiredRefreshToken
+	err = u.Repository.DBRepository.AuthRepository.DeleteSession(ctx, username)
+	if err != nil {
+		return util.ResponseGenerate(
+			500,
+			err,
+			nil,
+			nil,
+			nil,
+		)
+	}
+
+	err = u.Repository.DBRepository.AuthRepository.CreateSession(ctx, sessionRepo)
+	if err != nil {
+		return util.ResponseGenerate(
+			500,
+			err,
+			nil,
+			nil,
+			nil,
+		)
+	}
+
+	response = util.ResponseGenerate(200, nil, nil, data, nil)
 	return response
 }
