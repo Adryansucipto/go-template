@@ -12,7 +12,7 @@ func (c *Controller) GetUsers(eCtx echo.Context) error {
 
 	res, err := c.User.GetUsers(ctx)
 	if err != nil {
-		util.ErrorHandler(tag, res.ResponseMessage)
+		util.ErrorHandler(tag, res.Errors)
 		return util.HttpResponses(eCtx, res)
 	}
 	return util.HttpResponses(eCtx, res)

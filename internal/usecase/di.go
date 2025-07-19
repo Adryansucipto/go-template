@@ -8,6 +8,9 @@ import (
 	auth "go-template/internal/usecase/auth"
 	authImpl "go-template/internal/usecase/auth/impl"
 
+	role "go-template/internal/usecase/role"
+	roleImpl "go-template/internal/usecase/role/impl"
+
 	"go.uber.org/dig"
 )
 
@@ -16,6 +19,7 @@ type Usecase struct {
 
 	User user.Usecase
 	Auth auth.Usecase
+	Role role.Usecase
 }
 
 func Register(container *dig.Container) error {
@@ -23,7 +27,10 @@ func Register(container *dig.Container) error {
 		return fmt.Errorf("[DI] error provide user usecase: %+v", err)
 	}
 	if err := container.Provide(authImpl.New); err != nil {
-		return fmt.Errorf("[DI] error provide user usecase: %+v", err)
+		return fmt.Errorf("[DI] error provide auth usecase: %+v", err)
+	}
+	if err := container.Provide(roleImpl.New); err != nil {
+		return fmt.Errorf("[DI] error provide role usecase: %+v", err)
 	}
 	return nil
 }

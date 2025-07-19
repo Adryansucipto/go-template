@@ -7,11 +7,11 @@ import (
 )
 
 type Response struct {
-	ResponseCode    int   `json:"response_code"`
-	ResponseMessage error `json:"response_message"`
-	Errors          any   `json:"errors,omitempty"`
-	Data            any   `json:"data,omitempty"`
-	Page            any   `json:"page,omitempty"`
+	ResponseCode    int         `json:"response_code"`
+	ResponseMessage string      `json:"response_message"`
+	Errors          interface{} `json:"errors,omitempty"`
+	Data            any         `json:"data,omitempty"`
+	Page            any         `json:"page,omitempty"`
 }
 
 // Error implements error.
@@ -27,7 +27,7 @@ type FinalResponse struct {
 	Page            any    `json:"page,omitempty"`
 }
 
-func ResponseGenerate(code int, msg error, errors any, data any, page any) Response {
+func ResponseGenerate(code int, msg string, errors any, data any, page any) Response {
 	return Response{
 		ResponseCode:    code,
 		ResponseMessage: msg,

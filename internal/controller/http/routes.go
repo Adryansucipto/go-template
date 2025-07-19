@@ -2,6 +2,7 @@ package http
 
 import (
 	"go-template/internal/controller/http/auth"
+	"go-template/internal/controller/http/role"
 	"go-template/internal/controller/http/user"
 	"go-template/middleware"
 
@@ -15,6 +16,7 @@ type Controller struct {
 
 	User user.Controller
 	Auth auth.Controller
+	Role role.Controller
 }
 
 func (c *Controller) Routes(ec *echo.Echo, logger *zap.Logger) {
@@ -38,7 +40,11 @@ func (c *Controller) Routes(ec *echo.Echo, logger *zap.Logger) {
 
 	// auth
 	authGroup := v1.Group("/auth")
+	authGroup.POST("/authorize", c.Auth.AuthorizeFunction)
 	authGroup.POST("/login", c.Auth.LoginFunction)
 	authGroup.POST("/logout", c.Auth.LogoutFunction)
 	authGroup.POST("/refresh-token", c.Auth.RefreshFunction)
+
+	roleGroup := v1.Group("/role")
+	roleGroup.POST("", c.Role.CreateRole)
 }

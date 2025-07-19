@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 	"go-template/util"
+	CONST "go-template/util/consts"
 )
 
 func (u *Usecase) DeleteSession(ctx context.Context, username string) util.Response {
@@ -11,15 +12,15 @@ func (u *Usecase) DeleteSession(ctx context.Context, username string) util.Respo
 	if err != nil {
 		return util.ResponseGenerate(
 			500,
+			CONST.ErrorMessages[500],
 			err,
-			nil,
 			nil,
 			nil,
 		)
 	}
 	return util.ResponseGenerate(
 		200,
-		nil,
+		CONST.ErrorMessages[200],
 		nil,
 		nil,
 		nil,
