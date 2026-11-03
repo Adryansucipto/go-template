@@ -2,9 +2,11 @@ package user
 
 import (
 	"context"
-	"go-template/util"
+	"go-template/internal/controller/model"
+	"go-template/pkg/response"
 )
 
 type Usecase interface {
-	GetUsers(ctx context.Context) (res util.Response, err error)
+	GetUsers(ctx context.Context) (res response.Response, err error)
+	CreateUser(ctx context.Context, req model.CreateUserRequest) (res response.Response, err error)
 }

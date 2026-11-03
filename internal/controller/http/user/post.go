@@ -1,14 +1,35 @@
 package user
 
-// POST /users
-// func (c *Controller) CreateUser(eCtx echo.Context) error {
-// 	var newUser model.User
-// 	if err := eCtx.Bind(&newUser); err != nil {
-// 		return eCtx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
-// 	}
+import (
+	"go-template/internal/controller/model"
+	"go-template/pkg/response"
+	"net/http"
 
-// 	newUser.ID = len(users) + 1
-// 	users = append(users, newUser)
+	"github.com/labstack/echo/v4"
+)
 
-// 	return eCtx.JSON(http.StatusCreated, newUser)
-// }
+// POST /v1/register
+func (c *Controller) CreateUser(eCtx echo.Context) error {
+	ctx := eCtx.Request().Context()
+
+	var req model.CreateUserRequest
+	if err := eCtx.Bind(&req); err != nil {
+		res := response.ResponseGenerate(http.StatusBadRequest, err, err.Error(), nil, nil)
+		response.ErrorHandler(c.Logger, tag, res.ResponseMessage)
+		return response.HttpResponses(eCtx, res)
+	}
+
+	if err := eCtx.Validate(&req); err != nil {
+		res := response.ResponseGenerate(http.StatusBadRequest, err, err.Error(), nil, nil)
+		response.ErrorHandler(c.Logger, tag, res.ResponseMessage)
+		return response.HttpResponses(eCtx, res)
+	}
+
+	res, err := c.User.CreateUser(ctx, req)
+	if err != nil {
+		response.ErrorHandler(c.Logger, tag, res.ResponseMessage)
+		return response.HttpResponses(eCtx, res)
+	}
+
+	return response.HttpResponses(eCtx, res)
+}

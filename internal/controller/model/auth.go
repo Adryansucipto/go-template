@@ -1,10 +1,20 @@
 package model
 
-import "time"
+import (
+	"go-template/pkg/validator"
+	"time"
+)
 
 type AuthRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+func (r AuthRequest) Validate() error {
+	return validator.RequireNonEmpty(map[string]string{
+		"username": r.Username,
+		"password": r.Password,
+	})
 }
 
 type AuthResponse struct {

@@ -7,13 +7,17 @@ import (
 	authRepository "go-template/internal/repository/db/auth"
 	authRepositoryImpl "go-template/internal/repository/db/auth/impl"
 
+	outboxRepository "go-template/internal/repository/db/outbox"
+	outboxRepositoryImpl "go-template/internal/repository/db/outbox/impl"
+
 	"go.uber.org/dig"
 )
 
 type Repository struct {
 	dig.In
-	UserRepository userRepository.Repository
-	AuthRepository authRepository.Repository
+	UserRepository   userRepository.Repository
+	AuthRepository   authRepository.Repository
+	OutboxRepository outboxRepository.Repository
 }
 
 func Register(container *dig.Container) (err error) {
@@ -21,6 +25,9 @@ func Register(container *dig.Container) (err error) {
 		return err
 	}
 	if err := container.Provide(authRepositoryImpl.New); err != nil {
+		return err
+	}
+	if err := container.Provide(outboxRepositoryImpl.New); err != nil {
 		return err
 	}
 	return nil

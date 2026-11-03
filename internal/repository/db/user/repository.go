@@ -7,4 +7,5 @@ import (
 
 type Repository interface {
 	GetUserRepository(ctx context.Context) (user []model.User, err error)
+	CreateUserRepository(ctx context.Context, user model.User) (model.User, error)
 }

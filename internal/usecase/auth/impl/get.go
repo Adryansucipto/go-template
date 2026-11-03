@@ -3,29 +3,29 @@ package impl
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go-template/internal/repository/model"
-	"go-template/util"
+	"go-template/pkg/response"
 	"reflect"
 	"strings"
 )
 
-func (u *Usecase) GetRecordByToken(ctx context.Context, token string) (model.Session, util.Response) {
-	if token == "" {
+func (u *Usecase) GetRecordByToken(ctx context.Context, token string) (model.Session, response.Response) {
+	if token == "" || !strings.HasPrefix(token, "Bearer ") {
 		return model.Session{},
-			util.ResponseGenerate(
-				400,
-				errors.New("error token not found"),
+			response.ResponseGenerate(
+				401,
+				errors.New("missing or invalid bearer token"),
 				nil,
 				nil,
 				nil,
 			)
 	}
-	tokenNoBearer := strings.Split(token, "Bearer ")
-	record, err := u.Repository.DBRepository.AuthRepository.GetActiveSessionByToken(ctx, tokenNoBearer[1])
+
+	rawToken := strings.TrimPrefix(token, "Bearer ")
+	record, err := u.Repository.DBRepository.AuthRepository.GetActiveSessionByToken(ctx, rawToken)
 	if err != nil {
 		return model.Session{},
-			util.ResponseGenerate(
+			response.ResponseGenerate(
 				500,
 				err,
 				nil,
@@ -33,18 +33,17 @@ func (u *Usecase) GetRecordByToken(ctx context.Context, token string) (model.Ses
 				nil,
 			)
 	}
-	//cehck token habis?
+
 	if reflect.DeepEqual(record, model.Session{}) {
-		fmt.Println("token expired")
 		return model.Session{},
-			util.ResponseGenerate(
-				400,
-				errors.New("error token not found"),
+			response.ResponseGenerate(
+				401,
+				errors.New("session expired or token not found"),
 				nil,
 				nil,
 				nil,
 			)
 	}
 
-	return record, util.ResponseGenerate(200, nil, nil, nil, nil)
+	return record, response.ResponseGenerate(200, nil, nil, nil, nil)
 }

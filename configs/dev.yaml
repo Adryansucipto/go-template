@@ -1,0 +1,42 @@
+app:
+  env: dev
+  port: "9001"
+  base-path: go-template
+
+jwt:
+  secret: ${JWT_SECRET}
+
+database:
+  postgreSql:
+    driver: postgresql
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    host: ${DB_HOST}
+    port: "${DB_PORT}"
+    name: ${DB_NAME}
+    schema: ${DB_SCHEMA}
+    sslmode: disable
+    max_idle_conns: 10
+    max_open_conns: 100
+    conn_max_lifetime_minutes: 60
+
+kafka:
+  enabled: true
+  brokers: ${KAFKA_BROKERS}
+  group_id: ${KAFKA_GROUP_ID}
+  max_retries: 3
+  retry_backoff_ms: 500
+  dlq_topic_suffix: ".dlq"
+  outbox_batch_size: 50
+
+scheduler:
+  enabled: true
+  timezone: "Asia/Jakarta"
+  jobs:
+    outbox_relay:
+      enabled: true
+      cron: "@every 5s"
+      batch_size: 50
+    cleanup_expired_sessions:
+      enabled: true
+      cron: "*/15 * * * *" # Setiap 15 menit

@@ -2,9 +2,9 @@ name: Go CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
 
 jobs:
   build-and-test:
@@ -12,15 +12,15 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
-        go-version: '1.23.9' # sesuaikan dengan versi Go kamu
+        go-version: '1.23.9'
 
     - name: Cache Go modules
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/go-build
@@ -31,27 +31,15 @@ jobs:
 
     - name: Install dependencies
       run: go mod tidy
-          
-    - name: Create prod.yaml from GitHub secrets
-      run: |
-        mkdir -p variables
-        echo "database:" > variables/prod.yaml
-        echo "  postgreSql:" >> variables/prod.yaml
-        echo "    driver: postgresql" >> variables/prod.yaml
-        echo "    username: ${{ secrets.DB_USERNAME }}" >> variables/prod.yaml
-        echo "    password: ${{ secrets.DB_PASSWORD }}" >> variables/prod.yaml
-        echo "    host: ${{ secrets.DB_HOST }}" >> variables/prod.yaml
-        echo "    port: ${{ secrets.DB_PORT }}" >> variables/prod.yaml
-        echo "    name: ${{ secrets.DB_NAME }}" >> variables/prod.yaml
-        echo "    schema: ${{ secrets.DB_SCHEMA }}" >> variables/prod.yaml
-    
-    - name: Check if binary exists
-      run: |
-        ls -lah
-        file out
 
-    - name: Skip test (belum ada)
-      run: echo "No tests yet"
-      
-    - name: Build binary
-      run: go build -o out ./cmd
+    - name: Run go vet
+      run: go vet ./...
+
+    - name: Run unit tests
+      run: go test -v -race ./...
+
+    - name: Build API, Worker, & Scheduler binaries
+      run: |
+        go build -o ./bin/api ./cmd/api
+        go build -o ./bin/worker ./cmd/worker
+        go build -o ./bin/scheduler ./cmd/scheduler

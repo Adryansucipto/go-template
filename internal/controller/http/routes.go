@@ -1,11 +1,16 @@
 package http
 
 import (
+	"go-template/docs"
 	"go-template/internal/controller/http/auth"
 	"go-template/internal/controller/http/user"
-	"go-template/middleware"
+	"go-template/internal/middleware"
+	"go-template/pkg/config"
+	"go-template/pkg/resource/model"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"go.uber.org/dig"
 	"go.uber.org/zap"
 )
@@ -13,35 +18,47 @@ import (
 type Controller struct {
 	dig.In
 
-	User user.Controller
-	Auth auth.Controller
+	User     user.Controller
+	Auth     auth.Controller
+	Config   config.Config
+	Database model.Database
+	Logger   *zap.Logger
 }
 
-func (c *Controller) Routes(ec *echo.Echo, logger *zap.Logger) {
+func (c *Controller) Routes(ec *echo.Echo) {
+	ec.Use(echoMiddleware.Recover())
+	ec.Use(echoMiddleware.RequestID())
+	ec.Use(echoMiddleware.CORS())
+	ec.Use(middleware.ZapLogger(c.Logger))
 
-	ec.Use(middleware.ZapLogger(logger))
+	// Register Swagger UI (/swagger) and OpenAPI YAML (/docs/openapi.yaml)
+	docs.RegisterRoutes(ec)
 
-	ec.GET("/", func(c echo.Context) error {
-		return c.String(200, "Go API is up and running!")
+	ec.GET("/", func(eCtx echo.Context) error {
+		return eCtx.String(http.StatusOK, "Go API is up and running!")
 	})
-	ec.GET("/ping", func(c echo.Context) error {
-		return c.String(200, "Test Ping")
+
+	ec.GET("/health", func(eCtx echo.Context) error {
+		sqlDB, err := c.Database.PostgreSql.DB()
+		if err != nil {
+			return eCtx.JSON(http.StatusServiceUnavailable, echo.Map{"status": "unhealthy", "error": err.Error()})
+		}
+		if err := sqlDB.PingContext(eCtx.Request().Context()); err != nil {
+			return eCtx.JSON(http.StatusServiceUnavailable, echo.Map{"status": "unhealthy", "error": err.Error()})
+		}
+		return eCtx.JSON(http.StatusOK, echo.Map{"status": "healthy"})
 	})
 
-	base := ec.Group("")
-	v1 := base.Group("/v1")
+	v1 := ec.Group("/v1")
 
-	// user
-	userGroup := v1.Group("/users")
-	userGroup.GET("", c.User.GetUsers)
-	//userGroup.POST("", c.User.CreateUser)
+	// Public routes
+	v1.POST("/register", c.User.CreateUser)
+	v1.POST("/login", c.Auth.LoginFunction)
 
-	// auth
-	authGroup := v1.Group("/login")
-	authGroup.POST("", c.Auth.LoginFunction)
+	// Protected routes (JWT Auth Middleware)
+	protected := v1.Group("")
+	protected.Use(middleware.JWTAuth(c.Config.JWT))
 
-	// logout
-	logoutGroup := v1.Group("/logout")
-	logoutGroup.POST("", c.Auth.LogoutFunction)
-
+	protected.GET("/users", c.User.GetUsers)
+	protected.POST("/logout", c.Auth.LogoutFunction)
 }

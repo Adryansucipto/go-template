@@ -1,4 +1,25 @@
-internal/inbound/http/*/
-internal/inbound/model/*/
-internal/variables/*
-!internal/variables/dev.yaml
+# Binaries
+bin/
+tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+*.out
+
+# Dependency directories
+vendor/
+
+# Environment variables & local secrets
+.env
+.env.*
+!.env.example
+
+# IDE & OS files
+.idea/
+.vscode/
+.DS_Store

@@ -1,0 +1,42 @@
+app:
+  env: dev
+  port: "9001"
+  base-path: go-template
+
+jwt:
+  secret: change-me-in-production
+
+database:
+  postgreSql:
+    driver: postgresql
+    username: postgres
+    password: postgres
+    host: localhost
+    port: "5432"
+    name: go_template_db
+    schema: public
+    sslmode: disable
+    max_idle_conns: 10
+    max_open_conns: 100
+    conn_max_lifetime_minutes: 60
+
+kafka:
+  enabled: true
+  brokers: localhost:9092
+  group_id: go-template-consumer-group
+  max_retries: 3
+  retry_backoff_ms: 500
+  dlq_topic_suffix: ".dlq"
+  outbox_batch_size: 50
+
+scheduler:
+  enabled: true
+  timezone: "Asia/Jakarta"
+  jobs:
+    outbox_relay:
+      enabled: true
+      cron: "@every 5s"
+      batch_size: 50
+    cleanup_expired_sessions:
+      enabled: true
+      cron: "*/15 * * * *" # Setiap 15 menit (format standard cron: menit jam tanggal bulan hari)

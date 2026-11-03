@@ -4,6 +4,7 @@ import (
 	"go-template/internal/repository"
 	"go-template/internal/usecase"
 	"go-template/pkg/config"
+	"go-template/pkg/logger"
 	"go-template/pkg/resource"
 	"sync"
 
@@ -15,9 +16,6 @@ var (
 	once      sync.Once
 )
 
-// DI ini untuk menyimpan semua Usecase, Repository yang sudah di Register
-// Sedangkan Controller tidak perlu karena tidak perlu DI, maka tidak perlu di Register
-
 func Container() (*dig.Container, error) {
 	var outer error
 	once.Do(func() {
@@ -28,17 +26,22 @@ func Container() (*dig.Container, error) {
 			return
 		}
 
+		if err := logger.Register(container); err != nil {
+			outer = err
+			return
+		}
+
 		if err := resource.Register(container); err != nil {
 			outer = err
 			return
 		}
 
-		if err := usecase.Register(container); err != nil {
+		if err := repository.Register(container); err != nil {
 			outer = err
 			return
 		}
 
-		if err := repository.Register(container); err != nil {
+		if err := usecase.Register(container); err != nil {
 			outer = err
 			return
 		}
