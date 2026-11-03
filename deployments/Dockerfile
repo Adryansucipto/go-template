@@ -8,6 +8,7 @@ RUN go mod download
 
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/api ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/grpc ./cmd/grpc
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/worker ./cmd/worker
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/scheduler ./cmd/scheduler
 
@@ -19,10 +20,11 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 
 COPY --from=builder /app/bin/api /app/bin/api
+COPY --from=builder /app/bin/grpc /app/bin/grpc
 COPY --from=builder /app/bin/worker /app/bin/worker
 COPY --from=builder /app/bin/scheduler /app/bin/scheduler
 COPY --from=builder /app/configs /app/configs
 
-EXPOSE 9001
+EXPOSE 9001 9002
 
 ENTRYPOINT ["/app/bin/api"]

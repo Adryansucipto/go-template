@@ -51,14 +51,18 @@ func (c *Controller) Routes(ec *echo.Echo) {
 
 	v1 := ec.Group("/v1")
 
-	// Public routes
+	// 1. Public routes (No Auth)
 	v1.POST("/register", c.User.CreateUser)
 	v1.POST("/login", c.Auth.LoginFunction)
 
-	// Protected routes (JWT Auth Middleware)
-	protected := v1.Group("")
-	protected.Use(middleware.JWTAuth(c.Config.JWT))
+	// 2. JWT Protected routes (Authorization: Bearer <token>)
+	jwtProtected := v1.Group("")
+	jwtProtected.Use(middleware.JWTAuth(c.Config.JWT))
+	jwtProtected.GET("/users", c.User.GetUsers)
+	jwtProtected.POST("/logout", c.Auth.LogoutFunction)
 
-	protected.GET("/users", c.User.GetUsers)
-	protected.POST("/logout", c.Auth.LogoutFunction)
+	// 3. API Key Protected routes (X-API-Key: <key>) - Service-to-Service / Internal APIs
+	internalGroup := v1.Group("/internal")
+	internalGroup.Use(middleware.APIKeyAuth(c.Config.APIKey))
+	internalGroup.GET("/users", c.User.GetUsers)
 }

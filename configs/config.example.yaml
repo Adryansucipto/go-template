@@ -3,8 +3,19 @@ app:
   port: "9001"
   base-path: go-template
 
+grpc:
+  port: "9002"
+
 jwt:
   secret: change-me-in-production
+
+api_key:
+  enabled: true
+  header: "X-API-Key"
+  key: default-internal-api-key-change-me
+  clients:
+    payment_service: payment-service-secret-key
+    notification_service: notification-service-secret-key
 
 database:
   postgreSql:
@@ -40,3 +51,12 @@ scheduler:
     cleanup_expired_sessions:
       enabled: true
       cron: "*/15 * * * *" # Setiap 15 menit (format standard cron: menit jam tanggal bulan hari)
+
+client:
+  timeout_seconds: 10
+  services:
+    partner_service:
+      base_url: http://localhost:9001
+      grpc_addr: localhost:9002
+      api_key: default-internal-api-key-change-me
+      timeout_seconds: 5

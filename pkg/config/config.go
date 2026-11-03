@@ -9,11 +9,14 @@ import (
 )
 
 type Config struct {
-	AppConfig AppConfig       `yaml:"app"`
-	Database  Database        `yaml:"database"`
-	JWT       JwtCnfg         `yaml:"jwt"`
-	Kafka     KafkaConfig     `yaml:"kafka"`
-	Scheduler SchedulerConfig `yaml:"scheduler"`
+	AppConfig AppConfig            `yaml:"app"`
+	GRPC      GRPCServerConfig     `yaml:"grpc"`
+	Database  Database             `yaml:"database"`
+	JWT       JwtCnfg              `yaml:"jwt"`
+	APIKey    APIKeyConfig         `yaml:"api_key"`
+	Kafka     KafkaConfig          `yaml:"kafka"`
+	Scheduler SchedulerConfig      `yaml:"scheduler"`
+	Client    OutboundClientConfig `yaml:"client"`
 }
 
 func New() (Config, error) {

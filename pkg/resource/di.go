@@ -16,5 +16,13 @@ func Register(container *dig.Container) error {
 		return fmt.Errorf("[DI] cannot initialize Kafka: %+v", err)
 	}
 
+	if err := container.Provide(injection.NewHTTPClient); err != nil {
+		return fmt.Errorf("[DI] cannot initialize HTTPClient: %+v", err)
+	}
+
+	if err := container.Provide(injection.NewGRPCClient); err != nil {
+		return fmt.Errorf("[DI] cannot initialize GRPCClient: %+v", err)
+	}
+
 	return nil
 }

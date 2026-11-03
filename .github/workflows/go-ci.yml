@@ -38,8 +38,9 @@ jobs:
     - name: Run unit tests
       run: go test -v -race ./...
 
-    - name: Build API, Worker, & Scheduler binaries
+    - name: Build API, gRPC, Worker, & Scheduler binaries
       run: |
         go build -o ./bin/api ./cmd/api
+        go build -o ./bin/grpc ./cmd/grpc
         go build -o ./bin/worker ./cmd/worker
         go build -o ./bin/scheduler ./cmd/scheduler

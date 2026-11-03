@@ -3,8 +3,19 @@ app:
   port: "9001"
   base-path: go-template
 
+grpc:
+  port: "9002"
+
 jwt:
   secret: ${JWT_SECRET}
+
+api_key:
+  enabled: true
+  header: "X-API-Key"
+  key: ${API_KEY}
+  clients:
+    payment_service: ${PAYMENT_SERVICE_API_KEY}
+    notification_service: ${NOTIFICATION_SERVICE_API_KEY}
 
 database:
   postgreSql:
@@ -40,3 +51,12 @@ scheduler:
     cleanup_expired_sessions:
       enabled: true
       cron: "*/15 * * * *" # Setiap 15 menit
+
+client:
+  timeout_seconds: 10
+  services:
+    partner_service:
+      base_url: ${PARTNER_SERVICE_BASE_URL}
+      grpc_addr: ${PARTNER_SERVICE_GRPC_ADDR}
+      api_key: ${PARTNER_SERVICE_API_KEY}
+      timeout_seconds: 5

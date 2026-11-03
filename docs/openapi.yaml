@@ -12,6 +12,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
   schemas:
     StandardResponse:
       type: object
@@ -93,7 +97,7 @@ paths:
                 $ref: "#/components/schemas/StandardResponse"
   /v1/users:
     get:
-      summary: Get all users (Protected by JWT)
+      summary: Get all users (Protected by JWT Bearer Token)
       tags: [Auth & Users]
       security:
         - BearerAuth: []
@@ -106,7 +110,7 @@ paths:
                 $ref: "#/components/schemas/StandardResponse"
   /v1/logout:
     post:
-      summary: Logout active user session (Protected by JWT)
+      summary: Logout active user session (Protected by JWT Bearer Token)
       tags: [Auth & Users]
       security:
         - BearerAuth: []
@@ -117,4 +121,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StandardResponse"
-
+  /v1/internal/users:
+    get:
+      summary: Get all users for internal microservices (Protected by X-API-Key)
+      tags: [Internal Service-to-Service]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"

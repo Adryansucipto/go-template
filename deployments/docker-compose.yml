@@ -67,6 +67,7 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       PORT: ${PORT:-9001}
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-me}
+      API_KEY: ${API_KEY:-internal-secret-api-key-change-me}
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USERNAME: ${DB_USERNAME:-postgres}
@@ -77,6 +78,34 @@ services:
       KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-go-template-consumer-group}
     ports:
       - "${PORT:-9001}:9001"
+
+  grpc:
+    build:
+      context: ..
+      dockerfile: deployments/Dockerfile
+    container_name: go_template_grpc
+    entrypoint: ["/app/bin/grpc"]
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      GRPC_PORT: ${GRPC_PORT:-9002}
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-me}
+      API_KEY: ${API_KEY:-internal-secret-api-key-change-me}
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-go_template_db}
+      DB_SCHEMA: ${DB_SCHEMA:-public}
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-go-template-consumer-group}
+    ports:
+      - "${GRPC_PORT:-9002}:9002"
 
   worker:
     build:
@@ -93,6 +122,7 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-dev}
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-me}
+      API_KEY: ${API_KEY:-internal-secret-api-key-change-me}
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USERNAME: ${DB_USERNAME:-postgres}
@@ -117,6 +147,7 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-dev}
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-me}
+      API_KEY: ${API_KEY:-internal-secret-api-key-change-me}
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USERNAME: ${DB_USERNAME:-postgres}

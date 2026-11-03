@@ -1,6 +1,7 @@
 package repository
 
 import (
+	clientRepo "go-template/internal/repository/client"
 	dbRepo "go-template/internal/repository/db"
 	msgRepo "go-template/internal/repository/messaging"
 
@@ -12,6 +13,7 @@ type Repository struct {
 
 	DBRepository        dbRepo.Repository
 	MessagingRepository msgRepo.Repository
+	ClientRepository    clientRepo.Repository
 }
 
 func Register(container *dig.Container) (err error) {
@@ -20,6 +22,10 @@ func Register(container *dig.Container) (err error) {
 	}
 
 	if err := msgRepo.Register(container); err != nil {
+		return err
+	}
+
+	if err := clientRepo.Register(container); err != nil {
 		return err
 	}
 
