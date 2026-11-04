@@ -18,6 +18,18 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: go_template_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   kafka:
     image: redpandadata/redpanda:v24.1.1
     container_name: go_template_kafka
@@ -61,6 +73,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
@@ -74,6 +88,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-go_template_db}
       DB_SCHEMA: ${DB_SCHEMA:-public}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       KAFKA_BROKERS: kafka:29092
       KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-go-template-consumer-group}
     ports:
@@ -89,6 +105,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
@@ -102,6 +120,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-go_template_db}
       DB_SCHEMA: ${DB_SCHEMA:-public}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       KAFKA_BROKERS: kafka:29092
       KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-go-template-consumer-group}
     ports:
@@ -117,6 +137,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
@@ -129,6 +151,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-go_template_db}
       DB_SCHEMA: ${DB_SCHEMA:-public}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       KAFKA_BROKERS: kafka:29092
       KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-go-template-consumer-group}
 
@@ -142,6 +166,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
@@ -154,6 +180,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-go_template_db}
       DB_SCHEMA: ${DB_SCHEMA:-public}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       KAFKA_BROKERS: kafka:29092
       KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-go-template-consumer-group}
 

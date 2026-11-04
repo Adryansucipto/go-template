@@ -31,28 +31,55 @@ func (u *Usecase) CreateUser(ctx context.Context, req controllerModel.CreateUser
 		Password: hashedPassword,
 	}
 
-	created, err := u.Repository.DBRepository.UserRepository.CreateUserRepository(ctx, newUser)
-	if err != nil {
-		wrappedErr := fmt.Errorf("[CreateUser]-%s-%w", tag, err)
-		return response.ResponseGenerate(http.StatusInternalServerError, wrappedErr, nil, nil, nil), wrappedErr
+	var created repositoryModel.User
+
+	runInTx := func(txCtx context.Context) error {
+		var txErr error
+		created, txErr = u.Repository.DBRepository.UserRepository.CreateUserRepository(txCtx, newUser)
+		if txErr != nil {
+			return fmt.Errorf("[CreateUser]-%s-%w", tag, txErr)
+		}
+
+		if u.Repository.DBRepository.OutboxRepository != nil {
+			eventID := fmt.Sprintf("user-created-%s-%d", created.Username, time.Now().UnixNano())
+			_, cloudEventBytes, evtErr := event.NewCloudEvent(eventID, "user.created", "go-template.user", map[string]any{
+				"id":         created.ID,
+				"name":       created.Name,
+				"username":   created.Username,
+				"created_at": time.Now().UTC(),
+			})
+			if evtErr != nil {
+				return evtErr
+			}
+
+			if txErr := u.Repository.DBRepository.OutboxRepository.CreateOutboxEvent(txCtx, repositoryModel.OutboxEvent{
+				AggregateType: "user",
+				AggregateID:   created.Username,
+				Topic:         "user.events",
+				Payload:       string(cloudEventBytes),
+				Status:        repositoryModel.OutboxStatusPending,
+			}); txErr != nil {
+				return txErr
+			}
+		}
+
+		return nil
 	}
 
-	// Enqueue user.created event to Transactional Outbox
-	eventID := fmt.Sprintf("user-created-%s-%d", created.Username, time.Now().UnixNano())
-	_, cloudEventBytes, evtErr := event.NewCloudEvent(eventID, "user.created", "go-template.user", map[string]any{
-		"id":         created.ID,
-		"name":       created.Name,
-		"username":   created.Username,
-		"created_at": time.Now().UTC(),
-	})
-	if evtErr == nil && u.Repository.DBRepository.OutboxRepository != nil {
-		_ = u.Repository.DBRepository.OutboxRepository.CreateOutboxEvent(ctx, repositoryModel.OutboxEvent{
-			AggregateType: "user",
-			AggregateID:   created.Username,
-			Topic:         "user.events",
-			Payload:       string(cloudEventBytes),
-			Status:        repositoryModel.OutboxStatusPending,
-		})
+	// Execute User Creation + Outbox Event insertion atomically in a single DB Transaction
+	if u.Repository.DBRepository.TxManager != nil {
+		err = u.Repository.DBRepository.TxManager.WithTransaction(ctx, runInTx)
+	} else {
+		err = runInTx(ctx)
+	}
+
+	if err != nil {
+		return response.ResponseGenerate(http.StatusInternalServerError, err, nil, nil, nil), err
+	}
+
+	// Invalidate Redis cache after successful transaction commit
+	if u.Repository.CacheRepository.UserCache != nil {
+		_ = u.Repository.CacheRepository.UserCache.InvalidateUsersCache(ctx)
 	}
 
 	respData := controllerModel.User{
@@ -63,4 +90,3 @@ func (u *Usecase) CreateUser(ctx context.Context, req controllerModel.CreateUser
 
 	return response.ResponseGenerate(http.StatusCreated, nil, nil, respData, nil), nil
 }
-

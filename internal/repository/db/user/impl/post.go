@@ -2,11 +2,12 @@ package impl
 
 import (
 	"context"
+	"go-template/internal/repository/db/tx"
 	"go-template/internal/repository/model"
 )
 
 func (r *Repository) CreateUserRepository(ctx context.Context, user model.User) (model.User, error) {
-	db := r.DbGorm.WithContext(ctx)
+	db := tx.ExtractTx(ctx, r.DbGorm)
 
 	if err := db.Create(&user).Error; err != nil {
 		return model.User{}, err
@@ -14,4 +15,3 @@ func (r *Repository) CreateUserRepository(ctx context.Context, user model.User) 
 
 	return user, nil
 }
-

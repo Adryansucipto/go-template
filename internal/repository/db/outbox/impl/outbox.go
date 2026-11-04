@@ -2,13 +2,14 @@ package impl
 
 import (
 	"context"
+	"go-template/internal/repository/db/tx"
 	"go-template/internal/repository/model"
 	"go-template/pkg/response"
 	"time"
 )
 
 func (r *Repository) CreateOutboxEvent(ctx context.Context, event model.OutboxEvent) error {
-	db := r.DbGorm.WithContext(ctx)
+	db := tx.ExtractTx(ctx, r.DbGorm)
 	if event.Status == "" {
 		event.Status = model.OutboxStatusPending
 	}
@@ -23,7 +24,7 @@ func (r *Repository) CreateOutboxEvent(ctx context.Context, event model.OutboxEv
 
 func (r *Repository) FetchPendingEvents(ctx context.Context, limit int) ([]model.OutboxEvent, error) {
 	var events []model.OutboxEvent
-	db := r.DbGorm.WithContext(ctx)
+	db := tx.ExtractTx(ctx, r.DbGorm)
 
 	if err := db.Where("status = ?", model.OutboxStatusPending).
 		Order("created_at ASC").
@@ -36,7 +37,7 @@ func (r *Repository) FetchPendingEvents(ctx context.Context, limit int) ([]model
 
 func (r *Repository) MarkProcessed(ctx context.Context, id int64) error {
 	now := time.Now().UTC()
-	db := r.DbGorm.WithContext(ctx)
+	db := tx.ExtractTx(ctx, r.DbGorm)
 	if err := db.Model(&model.OutboxEvent{}).
 		Where("id = ?", id).
 		Updates(map[string]any{
@@ -54,7 +55,7 @@ func (r *Repository) MarkFailed(ctx context.Context, id int64, retryCount int, m
 		status = model.OutboxStatusFailed
 	}
 
-	db := r.DbGorm.WithContext(ctx)
+	db := tx.ExtractTx(ctx, r.DbGorm)
 	if err := db.Model(&model.OutboxEvent{}).
 		Where("id = ?", id).
 		Updates(map[string]any{
@@ -66,4 +67,3 @@ func (r *Repository) MarkFailed(ctx context.Context, id int64, retryCount int, m
 	}
 	return nil
 }
-

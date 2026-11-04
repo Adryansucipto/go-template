@@ -91,28 +91,48 @@ func (u *Usecase) LoginHandler(ctx context.Context, request controllerModel.Auth
 	sessionRepo.ExpiredSession = expiredToken
 	sessionRepo.ExpiredRefresh = expiredRefreshToken
 
-	if err = u.Repository.DBRepository.AuthRepository.DeleteSession(ctx, request.Username); err != nil {
-		return response.ResponseGenerate(500, err, nil, nil, nil)
+	// Execute DeleteSession + CreateSession + CreateOutboxEvent atomically inside a DB Transaction
+	runInTx := func(txCtx context.Context) error {
+		if txErr := u.Repository.DBRepository.AuthRepository.DeleteSession(txCtx, request.Username); txErr != nil {
+			return txErr
+		}
+
+		if txErr := u.Repository.DBRepository.AuthRepository.CreateSession(txCtx, sessionRepo); txErr != nil {
+			return txErr
+		}
+
+		if u.Repository.DBRepository.OutboxRepository != nil {
+			eventID := fmt.Sprintf("user-login-%s-%d", request.Username, time.Now().UnixNano())
+			_, cloudEventBytes, evtErr := event.NewCloudEvent(eventID, "user.logged_in", "go-template.auth", map[string]any{
+				"username":  request.Username,
+				"logged_at": time.Now().UTC(),
+			})
+			if evtErr != nil {
+				return evtErr
+			}
+
+			if txErr := u.Repository.DBRepository.OutboxRepository.CreateOutboxEvent(txCtx, repositoryModel.OutboxEvent{
+				AggregateType: "user",
+				AggregateID:   request.Username,
+				Topic:         "user.events",
+				Payload:       string(cloudEventBytes),
+				Status:        repositoryModel.OutboxStatusPending,
+			}); txErr != nil {
+				return txErr
+			}
+		}
+
+		return nil
 	}
 
-	if err = u.Repository.DBRepository.AuthRepository.CreateSession(ctx, sessionRepo); err != nil {
-		return response.ResponseGenerate(500, err, nil, nil, nil)
+	if u.Repository.DBRepository.TxManager != nil {
+		err = u.Repository.DBRepository.TxManager.WithTransaction(ctx, runInTx)
+	} else {
+		err = runInTx(ctx)
 	}
 
-	// Enqueue UserLoginEvent to Transactional Outbox table
-	eventID := fmt.Sprintf("user-login-%s-%d", request.Username, time.Now().UnixNano())
-	_, cloudEventBytes, err := event.NewCloudEvent(eventID, "user.logged_in", "go-template.auth", map[string]any{
-		"username":  request.Username,
-		"logged_at": time.Now().UTC(),
-	})
-	if err == nil {
-		_ = u.Repository.DBRepository.OutboxRepository.CreateOutboxEvent(ctx, repositoryModel.OutboxEvent{
-			AggregateType: "user",
-			AggregateID:   request.Username,
-			Topic:         "user.events",
-			Payload:       string(cloudEventBytes),
-			Status:        repositoryModel.OutboxStatusPending,
-		})
+	if err != nil {
+		return response.ResponseGenerate(500, err, nil, nil, nil)
 	}
 
 	return response.ResponseGenerate(200, nil, nil, data, nil)

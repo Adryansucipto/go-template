@@ -12,6 +12,10 @@ func Register(container *dig.Container) error {
 		return fmt.Errorf("[DI] cannot initialize Database: %+v", err)
 	}
 
+	if err := container.Provide(injection.NewRedis); err != nil {
+		return fmt.Errorf("[DI] cannot initialize Redis: %+v", err)
+	}
+
 	if err := container.Provide(injection.NewKafka); err != nil {
 		return fmt.Errorf("[DI] cannot initialize Kafka: %+v", err)
 	}

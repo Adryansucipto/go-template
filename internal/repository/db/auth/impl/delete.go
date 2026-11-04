@@ -2,12 +2,13 @@ package impl
 
 import (
 	"context"
+	"go-template/internal/repository/db/tx"
 	repoModel "go-template/internal/repository/model"
 	"go-template/pkg/response"
 )
 
 func (r *Repository) DeleteSession(ctx context.Context, username string) error {
-	db := r.DbGorm.WithContext(ctx)
+	db := tx.ExtractTx(ctx, r.DbGorm)
 
 	if err := db.Where("username = ?", username).Delete(&repoModel.Session{}).Error; err != nil {
 		return response.ErrorGenerate(tag, err)
@@ -17,12 +18,12 @@ func (r *Repository) DeleteSession(ctx context.Context, username string) error {
 }
 
 func (r *Repository) DeleteExpiredSessions(ctx context.Context) (int64, error) {
-	db := r.DbGorm.WithContext(ctx)
+	db := tx.ExtractTx(ctx, r.DbGorm)
 
-	tx := db.Where("expired_session <= (now() at time zone 'Asia/Jakarta')").Delete(&repoModel.Session{})
-	if tx.Error != nil {
-		return 0, response.ErrorGenerate(tag, tx.Error)
+	res := db.Where("expired_session <= (now() at time zone 'Asia/Jakarta')").Delete(&repoModel.Session{})
+	if res.Error != nil {
+		return 0, response.ErrorGenerate(tag, res.Error)
 	}
 
-	return tx.RowsAffected, nil
+	return res.RowsAffected, nil
 }
