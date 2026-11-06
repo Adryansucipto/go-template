@@ -34,4 +34,3 @@ func NewCloudEvent(id, eventType, source string, payload any) (CloudEvent, []byt
 
 	return evt, bytes, nil
 }
-

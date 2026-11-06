@@ -44,4 +44,3 @@ func (k *Kafka) Close() error {
 	}
 	return nil
 }
-

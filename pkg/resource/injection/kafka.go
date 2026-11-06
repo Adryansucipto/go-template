@@ -52,4 +52,3 @@ func NewKafka(cfg pkgConfig.Config) (model.Kafka, error) {
 		Writer:         writer,
 	}, nil
 }
-

@@ -17,7 +17,8 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.23.9'
+        go-version-file: 'go.mod'
+        check-latest: true
 
     - name: Cache Go modules
       uses: actions/cache@v4
@@ -29,18 +30,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Install dependencies
-      run: go mod tidy
+    - name: Verify dependencies
+      run: go mod verify
 
-    - name: Run go vet
-      run: go vet ./...
+    - name: Run unit tests & generate coverage
+      run: make test-coverage
 
-    - name: Run unit tests
-      run: go test -v -race ./...
-
-    - name: Build API, gRPC, Worker, & Scheduler binaries
-      run: |
-        go build -o ./bin/api ./cmd/api
-        go build -o ./bin/grpc ./cmd/grpc
-        go build -o ./bin/worker ./cmd/worker
-        go build -o ./bin/scheduler ./cmd/scheduler
+    - name: Build all binaries (API, gRPC, Worker, Scheduler)
+      run: make build-all

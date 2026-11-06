@@ -1,0 +1,30 @@
+with-expecter: true
+dir: "mocks/{{.PackagePath}}"
+outpkg: "{{.PackageName}}mock"
+filename: "{{.InterfaceNameLower}}.go"
+packages:
+  go-template/internal/repository/user:
+    interfaces:
+      Repository:
+  go-template/internal/repository/auth:
+    interfaces:
+      Repository:
+  go-template/internal/repository/event_queue:
+    interfaces:
+      Repository:
+  go-template/internal/repository/transaction:
+    interfaces:
+      Manager:
+  go-template/internal/outbound/cache/user:
+    interfaces:
+      Outbound:
+  go-template/internal/service/user:
+    interfaces:
+      Service:
+  go-template/internal/service/auth:
+    interfaces:
+      Service:
+  go-template/internal/service/event/producer:
+    interfaces:
+      Service:
+

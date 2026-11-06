@@ -33,4 +33,3 @@ func NewRedis(cfg pkgConfig.Config) (model.Redis, error) {
 		DefaultTTL: defaultTTL,
 	}, nil
 }
-

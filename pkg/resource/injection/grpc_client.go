@@ -8,4 +8,3 @@ import (
 func NewGRPCClient(cfg pkgConfig.Config) (*model.GRPCClient, error) {
 	return model.NewGRPCClientManager(cfg.Client), nil
 }
-

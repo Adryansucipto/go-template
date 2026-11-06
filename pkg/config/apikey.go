@@ -43,4 +43,3 @@ func (a *APIKeyConfig) Validate(incomingKey string) (string, bool) {
 
 	return "", false
 }
-

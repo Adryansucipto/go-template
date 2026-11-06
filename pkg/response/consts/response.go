@@ -17,4 +17,3 @@ var ErrorMessages = map[int]string{
 	CREATED_CODE:               "Created",
 	UNAUTHORIZED:               "Unauthorized",
 }
-

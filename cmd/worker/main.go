@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"go-template/internal/controller"
+	"go-template/internal/service"
 	"go-template/pkg/config"
 	pkgDi "go-template/pkg/di"
 	"go-template/pkg/resource/model"
@@ -16,9 +16,10 @@ import (
 
 func onRunWorker(container *dig.Container) error {
 	return container.Invoke(func(
-		ctrl controller.Controller,
+		svc service.Service,
 		cfg config.Config,
 		db model.Database,
+		redisRes model.Redis,
 		kafkaRes model.Kafka,
 		logger *zap.Logger,
 	) error {
@@ -31,14 +32,18 @@ func onRunWorker(container *dig.Container) error {
 
 		logger.Info("starting standalone Kafka Event Consumer worker", zap.String("env", cfg.AppConfig.Env))
 
-		// Start Kafka Event Consumers only
-		ctrl.Event.StartConsumers(ctx)
+		// Start Event Consumers from the Service Layer
+		svc.Consumer.Start(ctx)
 
 		<-ctx.Done()
 		logger.Info("shutting down standalone worker gracefully...")
 
 		if err := kafkaRes.Close(); err != nil {
 			logger.Error("failed closing kafka writer", zap.Error(err))
+		}
+
+		if err := redisRes.Close(); err != nil {
+			logger.Error("failed closing redis connection", zap.Error(err))
 		}
 
 		if sqlDB, err := db.PostgreSql.DB(); err == nil {

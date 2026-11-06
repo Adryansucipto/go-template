@@ -11,4 +11,3 @@ type JobSchedule struct {
 	Cron      string `yaml:"cron"`
 	BatchSize int    `yaml:"batch_size,omitempty"`
 }
-

@@ -57,10 +57,16 @@ func (r *Redis) Del(ctx context.Context, keys ...string) error {
 	return r.Client.Del(ctx, keys...).Err()
 }
 
+func (r *Redis) Ping(ctx context.Context) error {
+	if !r.Enabled || r.Client == nil {
+		return nil
+	}
+	return r.Client.Ping(ctx).Err()
+}
+
 func (r *Redis) Close() error {
 	if r.Client != nil {
 		return r.Client.Close()
 	}
 	return nil
 }
-

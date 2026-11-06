@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"go-template/internal/controller/model"
-	userUsecase "go-template/internal/usecase/user"
+	userService "go-template/internal/service/user"
 	userv1 "go-template/proto/user/v1"
 
 	"go.uber.org/dig"
@@ -15,7 +15,7 @@ import (
 type Server struct {
 	dig.In
 
-	User   userUsecase.Usecase
+	User   userService.Service
 	Logger *zap.Logger
 }
 
@@ -44,4 +44,3 @@ func (s *Server) GetUsers(ctx context.Context, req *userv1.GetUsersRequest) (*us
 		Users: items,
 	}, nil
 }
-

@@ -29,4 +29,3 @@ func NewHTTPClient(cfg pkgConfig.Config) (model.HTTPClient, error) {
 		Config:        cfg.Client,
 	}, nil
 }
-

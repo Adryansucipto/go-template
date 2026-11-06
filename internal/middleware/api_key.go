@@ -32,4 +32,3 @@ func APIKeyAuth(apiKeyCfg config.APIKeyConfig) echo.MiddlewareFunc {
 		}
 	}
 }
-

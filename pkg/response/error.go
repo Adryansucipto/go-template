@@ -20,4 +20,3 @@ func ErrorHandler(logger *zap.Logger, tag string, err error) {
 	}
 	fmt.Printf("%s -> %v\n", tag, err)
 }
-

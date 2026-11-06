@@ -1,8 +1,9 @@
 package di
 
 import (
+	"go-template/internal/outbound"
 	"go-template/internal/repository"
-	"go-template/internal/usecase"
+	"go-template/internal/service"
 	"go-template/pkg/config"
 	"go-template/pkg/logger"
 	"go-template/pkg/resource"
@@ -41,7 +42,12 @@ func Container() (*dig.Container, error) {
 			return
 		}
 
-		if err := usecase.Register(container); err != nil {
+		if err := outbound.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := service.Register(container); err != nil {
 			outer = err
 			return
 		}

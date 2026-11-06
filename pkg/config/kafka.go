@@ -3,13 +3,13 @@ package config
 import "strings"
 
 type KafkaConfig struct {
-	Enabled         bool   `yaml:"enabled"`
-	Brokers         string `yaml:"brokers"`
-	GroupID         string `yaml:"group_id"`
-	MaxRetries      int    `yaml:"max_retries"`
-	RetryBackoffMs  int    `yaml:"retry_backoff_ms"`
-	DLQTopicSuffix  string `yaml:"dlq_topic_suffix"`
-	OutboxBatchSize int    `yaml:"outbox_batch_size"`
+	Enabled             bool   `yaml:"enabled"`
+	Brokers             string `yaml:"brokers"`
+	GroupID             string `yaml:"group_id"`
+	MaxRetries          int    `yaml:"max_retries"`
+	RetryBackoffMs      int    `yaml:"retry_backoff_ms"`
+	DLQTopicSuffix      string `yaml:"dlq_topic_suffix"`
+	EventQueueBatchSize int    `yaml:"event_queue_batch_size"`
 }
 
 func (k *KafkaConfig) BrokerList() []string {

@@ -48,4 +48,3 @@ func HttpResponses(eCtx echo.Context, res Response) error {
 	finalResponse.Page = res.Page
 	return eCtx.JSON(res.ResponseCode, finalResponse)
 }
-

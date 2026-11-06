@@ -46,13 +46,13 @@ kafka:
   max_retries: 3
   retry_backoff_ms: 500
   dlq_topic_suffix: ".dlq"
-  outbox_batch_size: 50
+  event_queue_batch_size: 50
 
 scheduler:
   enabled: true
   timezone: "Asia/Jakarta"
   jobs:
-    outbox_relay:
+    event_queue_relay:
       enabled: true
       cron: "@every 5s"
       batch_size: 50

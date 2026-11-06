@@ -11,6 +11,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/dig"
 	"go.uber.org/zap"
 )
@@ -22,6 +23,7 @@ type Controller struct {
 	Auth     auth.Controller
 	Config   config.Config
 	Database model.Database
+	Redis    model.Redis
 	Logger   *zap.Logger
 }
 
@@ -30,23 +32,66 @@ func (c *Controller) Routes(ec *echo.Echo) {
 	ec.Use(echoMiddleware.RequestID())
 	ec.Use(echoMiddleware.CORS())
 	ec.Use(middleware.ZapLogger(c.Logger))
+	ec.Use(middleware.PrometheusMetrics())
 
 	// Register Swagger UI (/swagger) and OpenAPI YAML (/docs/openapi.yaml)
 	docs.RegisterRoutes(ec)
+
+	// Expose Prometheus Metrics (/metrics)
+	ec.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 
 	ec.GET("/", func(eCtx echo.Context) error {
 		return eCtx.String(http.StatusOK, "Go API is up and running!")
 	})
 
+	// General Health
 	ec.GET("/health", func(eCtx echo.Context) error {
-		sqlDB, err := c.Database.PostgreSql.DB()
-		if err != nil {
-			return eCtx.JSON(http.StatusServiceUnavailable, echo.Map{"status": "unhealthy", "error": err.Error()})
-		}
-		if err := sqlDB.PingContext(eCtx.Request().Context()); err != nil {
-			return eCtx.JSON(http.StatusServiceUnavailable, echo.Map{"status": "unhealthy", "error": err.Error()})
-		}
 		return eCtx.JSON(http.StatusOK, echo.Map{"status": "healthy"})
+	})
+
+	// K8s Liveness Probe: process is alive
+	ec.GET("/health/liveness", func(eCtx echo.Context) error {
+		return eCtx.JSON(http.StatusOK, echo.Map{"status": "alive"})
+	})
+
+	// K8s Readiness Probe: dependencies (PostgreSQL, Redis) are healthy
+	ec.GET("/health/readiness", func(eCtx echo.Context) error {
+		ctx := eCtx.Request().Context()
+		checks := echo.Map{}
+		isHealthy := true
+
+		// Check PostgreSQL
+		sqlDB, err := c.Database.PostgreSql.DB()
+		if err != nil || sqlDB.PingContext(ctx) != nil {
+			isHealthy = false
+			if err != nil {
+				checks["database"] = err.Error()
+			} else {
+				checks["database"] = sqlDB.PingContext(ctx).Error()
+			}
+		} else {
+			checks["database"] = "up"
+		}
+
+		// Check Redis
+		if err := c.Redis.Ping(ctx); err != nil {
+			isHealthy = false
+			checks["redis"] = err.Error()
+		} else {
+			checks["redis"] = "up"
+		}
+
+		if !isHealthy {
+			return eCtx.JSON(http.StatusServiceUnavailable, echo.Map{
+				"status": "unhealthy",
+				"checks": checks,
+			})
+		}
+
+		return eCtx.JSON(http.StatusOK, echo.Map{
+			"status": "ready",
+			"checks": checks,
+		})
 	})
 
 	v1 := ec.Group("/v1")

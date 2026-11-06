@@ -91,4 +91,3 @@ func (h *HTTPClient) DoJSON(ctx context.Context, opt HTTPRequestOption, response
 
 	return resp.StatusCode, nil
 }
-

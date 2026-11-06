@@ -15,4 +15,3 @@ type ExternalServiceConfig struct {
 	APIKey     string `yaml:"api_key,omitempty"`
 	TimeoutSec int    `yaml:"timeout_seconds,omitempty"`
 }
-

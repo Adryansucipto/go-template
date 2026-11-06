@@ -89,4 +89,3 @@ func (c *Controller) apiKeyUnaryInterceptor() grpc.UnaryServerInterceptor {
 		return handler(ctx, req)
 	}
 }
-

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"go-template/internal/controller"
+	"go-template/internal/service"
 	"go-template/pkg/config"
 	pkgDi "go-template/pkg/di"
 	"go-template/pkg/resource/model"
@@ -16,9 +16,10 @@ import (
 
 func onRunScheduler(container *dig.Container) error {
 	return container.Invoke(func(
-		ctrl controller.Controller,
+		svc service.Service,
 		cfg config.Config,
 		db model.Database,
+		redisRes model.Redis,
 		kafkaRes model.Kafka,
 		logger *zap.Logger,
 	) error {
@@ -31,14 +32,18 @@ func onRunScheduler(container *dig.Container) error {
 
 		logger.Info("starting standalone Cron Scheduler", zap.String("env", cfg.AppConfig.Env))
 
-		// Start Cron Scheduler only (configured via configs/*.yaml)
-		ctrl.Scheduler.Start(ctx)
+		// Start Cron Scheduler from the Service Layer (configured via configs/*.yaml)
+		svc.Scheduler.Start(ctx)
 
 		<-ctx.Done()
 		logger.Info("shutting down standalone scheduler gracefully...")
 
 		if err := kafkaRes.Close(); err != nil {
 			logger.Error("failed closing kafka writer", zap.Error(err))
+		}
+
+		if err := redisRes.Close(); err != nil {
+			logger.Error("failed closing redis connection", zap.Error(err))
 		}
 
 		if sqlDB, err := db.PostgreSql.DB(); err == nil {
@@ -61,4 +66,3 @@ func main() {
 		panic(err)
 	}
 }
-

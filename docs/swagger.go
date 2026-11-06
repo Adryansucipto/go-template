@@ -40,4 +40,3 @@ func RegisterRoutes(ec *echo.Echo) {
 		return c.HTML(http.StatusOK, swaggerUIHTML)
 	})
 }
-

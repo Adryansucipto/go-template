@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS "public"."SESSION" (
 
 CREATE INDEX IF NOT EXISTS idx_session_access_token ON "public"."SESSION" (access_token);
 
-CREATE TABLE IF NOT EXISTS "public"."OUTBOX_EVENTS" (
+-- Event queue table (Transactional Outbox): events are saved together with business data,
+-- then relayed to Kafka by the scheduler.
+CREATE TABLE IF NOT EXISTS "public"."EVENT_QUEUE" (
     id BIGSERIAL PRIMARY KEY,
     aggregate_type VARCHAR(100) NOT NULL,
     aggregate_id VARCHAR(100) NOT NULL,
@@ -29,4 +31,4 @@ CREATE TABLE IF NOT EXISTS "public"."OUTBOX_EVENTS" (
     processed_at TIMESTAMP WITH TIME ZONE
 );
 
-CREATE INDEX IF NOT EXISTS idx_outbox_status_created ON "public"."OUTBOX_EVENTS" (status, created_at);
+CREATE INDEX IF NOT EXISTS idx_event_queue_status_created ON "public"."EVENT_QUEUE" (status, created_at);

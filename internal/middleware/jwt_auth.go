@@ -35,4 +35,3 @@ func JWTAuth(jwtCfg config.JwtCnfg) echo.MiddlewareFunc {
 		}
 	}
 }
-

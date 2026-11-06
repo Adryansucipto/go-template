@@ -36,4 +36,3 @@ func RequireNonEmpty(fields map[string]string) error {
 	}
 	return nil
 }
-

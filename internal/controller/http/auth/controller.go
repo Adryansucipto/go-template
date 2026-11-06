@@ -1,7 +1,7 @@
 package auth
 
 import (
-	authUsecase "go-template/internal/usecase/auth"
+	authService "go-template/internal/service/auth"
 
 	"go.uber.org/dig"
 	"go.uber.org/zap"
@@ -13,6 +13,6 @@ var (
 
 type Controller struct {
 	dig.In
-	Auth   authUsecase.Usecase
+	Auth   authService.Service
 	Logger *zap.Logger
 }
