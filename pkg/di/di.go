@@ -1,0 +1,60 @@
+package di
+
+import (
+	"go-template/internal/outbound"
+	"go-template/internal/repository"
+	"go-template/internal/service"
+	"go-template/pkg/config"
+	"go-template/pkg/logger"
+	"go-template/pkg/resource"
+	"sync"
+
+	"go.uber.org/dig"
+)
+
+var (
+	container *dig.Container
+	once      sync.Once
+)
+
+func Container() (*dig.Container, error) {
+	var outer error
+	once.Do(func() {
+		container = dig.New()
+
+		if err := config.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := logger.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := resource.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := repository.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := outbound.Register(container); err != nil {
+			outer = err
+			return
+		}
+
+		if err := service.Register(container); err != nil {
+			outer = err
+			return
+		}
+	})
+
+	if outer != nil {
+		return nil, outer
+	}
+	return container, nil
+}

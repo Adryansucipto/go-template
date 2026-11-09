@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Go Clean Architecture + EDA Boilerplate API
+  description: Standard REST API & Event-Driven Architecture Boilerplate in Go
+  version: 1.0.0
+servers:
+  - url: http://localhost:9001
+    description: Local Development Server
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    StandardResponse:
+      type: object
+      properties:
+        response_code:
+          type: integer
+          example: 200
+        response_message:
+          type: string
+          example: Success
+        data:
+          type: object
+        errors:
+          type: object
+    CreateUserRequest:
+      type: object
+      required: [name, username, password]
+      properties:
+        name:
+          type: string
+          example: Budi Santoso
+        username:
+          type: string
+          example: budi123
+        password:
+          type: string
+          example: secret123
+    AuthRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: budi123
+        password:
+          type: string
+          example: secret123
+paths:
+  /health:
+    get:
+      summary: Database & Service Healthcheck
+      tags: [System]
+      responses:
+        "200":
+          description: Service and PostgreSQL are healthy
+  /v1/register:
+    post:
+      summary: Register a new user (hashes password & emits user.created event queue entry)
+      tags: [Auth & Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /v1/login:
+    post:
+      summary: Login user & issue JWT tokens (emits user.logged_in event queue entry)
+      tags: [Auth & Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /v1/users:
+    get:
+      summary: Get all users (Protected by JWT Bearer Token)
+      tags: [Auth & Users]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /v1/logout:
+    post:
+      summary: Logout active user session (Protected by JWT Bearer Token)
+      tags: [Auth & Users]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /v1/internal/users:
+    get:
+      summary: Get all users for internal microservices (Protected by X-API-Key)
+      tags: [Internal Service-to-Service]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"

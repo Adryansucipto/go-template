@@ -1,0 +1,70 @@
+app:
+  env: prod
+  port: "${PORT}"
+  base-path: go-template
+
+grpc:
+  port: "${GRPC_PORT}"
+
+jwt:
+  secret: ${JWT_SECRET}
+
+api_key:
+  enabled: true
+  header: "X-API-Key"
+  key: ${API_KEY}
+  clients:
+    payment_service: ${PAYMENT_SERVICE_API_KEY}
+    notification_service: ${NOTIFICATION_SERVICE_API_KEY}
+
+database:
+  postgreSql:
+    driver: postgresql
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    host: ${DB_HOST}
+    port: "${DB_PORT}"
+    name: ${DB_NAME}
+    schema: ${DB_SCHEMA}
+    sslmode: require
+    max_idle_conns: 20
+    max_open_conns: 100
+    conn_max_lifetime_minutes: 60
+
+redis:
+  enabled: true
+  host: ${REDIS_HOST}
+  port: "${REDIS_PORT}"
+  password: ${REDIS_PASSWORD}
+  db: 0
+  default_ttl_minutes: 15
+
+kafka:
+  enabled: true
+  brokers: ${KAFKA_BROKERS}
+  group_id: ${KAFKA_GROUP_ID}
+  max_retries: 5
+  retry_backoff_ms: 1000
+  dlq_topic_suffix: ".dlq"
+  event_queue_batch_size: 100
+
+scheduler:
+  enabled: true
+  timezone: "Asia/Jakarta"
+  jobs:
+    event_queue_relay:
+      enabled: true
+      cron: "@every 3s"
+      batch_size: 100
+    cleanup_expired_sessions:
+      enabled: true
+      cron: "0 * * * *" # Setiap 1 jam sekali (menit ke-0)
+
+client:
+  timeout_seconds: 10
+  services:
+    partner_service:
+      base_url: ${PARTNER_SERVICE_BASE_URL}
+      grpc_addr: ${PARTNER_SERVICE_GRPC_ADDR}
+      api_key: ${PARTNER_SERVICE_API_KEY}
+      timeout_seconds: 5
